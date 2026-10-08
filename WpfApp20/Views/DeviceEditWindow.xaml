@@ -1,0 +1,140 @@
+<Window x:Class="WpfApp20.Views.DeviceEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:WpfApp20.Views"
+        xmlns:app="clr-namespace:WpfApp20"
+        Title="设备配置" Width="780" Height="760" WindowStartupLocation="CenterOwner"
+        Background="{StaticResource Brush.Bg}" ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 标题 -->
+        <TextBlock x:Name="TitleText" Text="新增设备" Style="{StaticResource Text.Title}" Grid.Row="0" Margin="0,0,0,14"/>
+
+        <!-- 基本信息表单 -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,10">
+                    <TextBlock Text="设备名称" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="TbName" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,12,10">
+                    <TextBlock Text="IP 地址" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="TbHost" Text="{Binding Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,10">
+                    <TextBlock Text="端口" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="TbPort" Text="{Binding Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+                                                     Converter={app:NumericTextConverter}}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,0">
+                    <TextBlock Text="Modbus 单元号 (Unit ID)" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding UnitId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+                                    Converter={app:NumericTextConverter}}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,12,0">
+                    <TextBlock Text="轮询周期 (ms)" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding PollIntervalMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+                                    Converter={app:NumericTextConverter}}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,0" VerticalAlignment="Bottom">
+                    <CheckBox x:Name="CbSim" Content="仿真设备（无需真实 PLC）"
+                              IsChecked="{Binding Simulated, Mode=TwoWay}"
+                              Foreground="{StaticResource Brush.Warn}" Margin="2,8,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 通信管理：自动重连 / 心跳检测 -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,10">
+                    <TextBlock Text="最大重连次数（0 = 无限）" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="TbMaxRetry" Text="{Binding MaxReconnectAttempts, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+                                                          Converter={app:NumericTextConverter}}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,12,10">
+                    <TextBlock Text="重连基础延时 (ms)" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="TbRetryDelay" Text="{Binding ReconnectBaseDelayMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+                                                            Converter={app:NumericTextConverter}}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,10" VerticalAlignment="Bottom">
+                    <CheckBox Content="启用自动重连" IsChecked="{Binding AutoReconnect, Mode=TwoWay}" Margin="2,8,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,0">
+                    <TextBlock Text="心跳间隔 (ms)" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="TbHbInterval" Text="{Binding HeartbeatIntervalMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+                                                             Converter={app:NumericTextConverter}}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,12,0">
+                    <TextBlock Text="心跳探测地址" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="TbHbAddress" Text="{Binding HeartbeatAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+                                                            Converter={app:NumericTextConverter}}"
+                             ToolTip="心跳读取的地址，区域默认跟随点表：点表里有线圈就用线圈，否则用保持寄存器"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="2" VerticalAlignment="Bottom">
+                    <CheckBox Content="启用心跳检测" IsChecked="{Binding HeartbeatEnabled, Mode=TwoWay}" Margin="2,8,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 标签（点表） -->
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,8">
+                <TextBlock Text="监控点表（标签）" Foreground="{StaticResource Brush.Text}"
+                           FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <Button Content="＋ 添加标签" Style="{StaticResource Btn.Accent}" Margin="16,0,0,0" Click="OnAddTag" Padding="10,5"/>
+                <Button Content="✎ 编辑" Margin="8,0,0,0" Click="OnEditTag" Padding="10,5"/>
+                <Button Content="🗑 移除" Margin="8,0,0,0" Style="{StaticResource Btn.Danger}" Click="OnRemoveTag" Padding="10,5"/>
+            </StackPanel>
+            <DataGrid x:Name="TagGrid" Grid.Row="1" ItemsSource="{Binding Tags}" MinHeight="200">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="150" FontWeight="SemiBold"/>
+                    <DataGridTextColumn Header="地址" Binding="{Binding Address}" Width="70"/>
+                    <DataGridTextColumn Header="区域" Binding="{Binding AreaDisplay}" Width="130"/>
+                    <DataGridTextColumn Header="数据类型" Binding="{Binding DataTypeDisplay}" Width="130"/>
+                    <DataGridTextColumn Header="缩放/偏移" Binding="{Binding ScaleText}" Width="110"/>
+                    <DataGridTextColumn Header="报警规则" Binding="{Binding AlarmRules.Count}" Width="80"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- 底部按钮 -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="取消" MinWidth="90" Click="OnCancel"/>
+            <Button Content="保存" Style="{StaticResource Btn.Accent}" MinWidth="90" Margin="10,0,0,0" Click="OnOk"/>
+        </StackPanel>
+    </Grid>
+</Window>

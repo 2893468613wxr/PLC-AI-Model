@@ -1,0 +1,139 @@
+<UserControl x:Class="WpfApp20.Views.AiChatView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:WpfApp20.Views">
+    <UserControl.Resources>
+        <!-- 消息气泡：区分 用户 / 助手 / 工具调用过程 -->
+        <DataTemplate DataType="{x:Type views:ChatItem}">
+            <StackPanel Margin="0,0,0,14">
+                <Border x:Name="Bubble" MaxWidth="760">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource Brush.Panel2}"/>
+                            <Setter Property="CornerRadius" Value="10"/>
+                            <Setter Property="Padding" Value="13,9"/>
+                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsUser}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource Brush.AccentDark}"/>
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsTool}" Value="True">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                    <Setter Property="Padding" Value="11,7"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <StackPanel>
+                        <TextBlock Text="{Binding Header}" Margin="0,0,0,5" Opacity="0.75">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="FontSize" Value="11.5"/>
+                                    <Setter Property="Foreground" Value="{StaticResource Brush.SubText}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsTool}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <TextBlock Text="{Binding Text}" TextWrapping="Wrap" LineHeight="21">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="FontSize" Value="14"/>
+                                    <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsTool}" Value="True">
+                                            <Setter Property="FontSize" Value="12"/>
+                                            <Setter Property="Foreground" Value="{StaticResource Brush.SubText}"/>
+                                            <Setter Property="FontFamily" Value="Consolas, 'Cascadia Mono', 'Microsoft YaHei UI'"/>
+                                            <Setter Property="LineHeight" Value="17"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 工具栏 -->
+        <Border Grid.Row="0" Style="{StaticResource Toolbar}">
+            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="AI 智能问答" Style="{StaticResource Text.Title}" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TbHint" Text="直接用中文问设备数据，纯本地运行；CPU 推理，首次回答约需 20~40 秒"
+                           Style="{StaticResource Text.Sub}"
+                           VerticalAlignment="Center" Margin="14,4,0,0"/>
+
+                <StackPanel Orientation="Horizontal" Margin="26,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="模型：" VerticalAlignment="Center" Foreground="{StaticResource Brush.SubText}"/>
+                    <ComboBox x:Name="CbModel" Width="180" MinHeight="32"
+                              SelectionChanged="OnModelChanged" Margin="6,0,0,0"/>
+                    <CheckBox x:Name="ChkWrite" Content="允许 AI 写入 PLC" Margin="18,0,0,0"
+                              VerticalAlignment="Center" ToolTip="开启后助手才能向可写数据点下发数值"
+                              Checked="OnWriteToggled" Unchecked="OnWriteToggled"/>
+                    <Button Content="清空对话" Margin="16,0,0,0" Padding="12,5" Click="OnClear"/>
+                    <Button Content="重启本地模型服务" Margin="8,0,0,0" Padding="12,5" Click="OnRestartService"
+                            ToolTip="模型服务异常无响应时，重启后重试"/>
+                </StackPanel>
+            </WrapPanel>
+        </Border>
+
+        <!-- 对话区 -->
+        <ScrollViewer Grid.Row="1" x:Name="Scroller" VerticalScrollBarVisibility="Auto" Margin="16,16,16,4">
+            <ItemsControl x:Name="ChatList"/>
+        </ScrollViewer>
+
+        <!-- 快捷问题 -->
+        <WrapPanel Grid.Row="2" x:Name="QuickPanel" Margin="16,0,16,6"/>
+
+        <!-- 状态行 -->
+        <TextBlock Grid.Row="3" x:Name="TbStatus" Margin="16,0,16,6"
+                   Text="正在初始化…" Foreground="{StaticResource Brush.SubText}" FontSize="12"/>
+
+        <!-- 输入区 -->
+        <Border Grid.Row="4" Padding="16,10,16,14" Background="{StaticResource Brush.Bg2}"
+                BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="TbInput" Grid.Column="0" MinHeight="80" MaxHeight="220"
+                         AcceptsReturn="True" TextWrapping="Wrap"
+                         VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto"
+                         PreviewKeyDown="OnInputKeyDown"/>
+
+                <Button x:Name="BtnSend" Grid.Column="1" Content="发送 (Enter)"
+                        Style="{StaticResource Btn.Accent}"
+                        Width="110" Height="80" Margin="12,0,0,0" VerticalAlignment="Bottom" Click="OnSend"/>
+
+                <Button x:Name="BtnStop" Grid.Column="2" Content="停止"
+                        Style="{StaticResource Btn.Danger}"
+                        Width="80" Height="80" Margin="8,0,0,0" VerticalAlignment="Bottom"
+                        Visibility="Collapsed" Click="OnStop"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

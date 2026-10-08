@@ -1,0 +1,132 @@
+<Window x:Class="WpfApp20.Views.TagEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:WpfApp20.Models"
+    xmlns:app="clr-namespace:WpfApp20"
+    Title="标签配置" Width="640" Height="640" WindowStartupLocation="CenterOwner"
+        Background="{StaticResource Brush.Bg}" ResizeMode="NoResize">
+    <Window.Resources>
+        <ObjectDataProvider x:Key="Areas" MethodName="GetValues" ObjectType="{x:Type System:Enum}" xmlns:System="clr-namespace:System;assembly=mscorlib">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:ModbusArea"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="DataTypes" MethodName="GetValues" ObjectType="{x:Type System:Enum}" xmlns:System="clr-namespace:System;assembly=mscorlib">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:TagDataType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="Operators" MethodName="GetValues" ObjectType="{x:Type System:Enum}" xmlns:System="clr-namespace:System;assembly=mscorlib">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:AlarmOperator"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="Levels" MethodName="GetValues" ObjectType="{x:Type System:Enum}" xmlns:System="clr-namespace:System;assembly=mscorlib">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:AlarmLevel"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="标签（监控点）配置" Style="{StaticResource Text.Title}" Margin="0,0,0,14" Grid.Row="0"/>
+
+        <!-- 基本属性 -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,10">
+                    <TextBlock Text="标签名称" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,12,10">
+                    <TextBlock Text="地址（0 基）" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+                                    Converter={app:NumericTextConverter}}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,10">
+                    <TextBlock Text="区域（功能码）" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding Source={StaticResource Areas}}"
+                              SelectedItem="{Binding Area, Mode=TwoWay}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,10">
+                    <TextBlock Text="数据类型" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding Source={StaticResource DataTypes}}"
+                              SelectedItem="{Binding DataType, Mode=TwoWay}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,12,10">
+                    <TextBlock Text="缩放系数 Scale" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding Scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+                                    Converter={app:NumericTextConverter}}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,10">
+                    <TextBlock Text="零点偏移 Offset" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding Offset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,
+                                    Converter={app:NumericTextConverter}}"/>
+                </StackPanel>
+
+                <CheckBox Grid.Row="2" Grid.Column="0" Content="32 位类型高低字交换（字序 ABCD↔CDAB）"
+                          IsChecked="{Binding WordSwap, Mode=TwoWay}" Margin="2,2,0,0"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                           Text="显示值 = 原始值 × Scale + Offset" Style="{StaticResource Text.Sub}"
+                           VerticalAlignment="Center" Margin="4,0,0,0"/>
+            </Grid>
+        </Border>
+
+        <!-- 报警规则 -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="报警规则" Foreground="{StaticResource Brush.Text}"
+                           FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <Button Content="＋ 添加规则" Style="{StaticResource Btn.Accent}" Margin="16,0,0,0"
+                        Click="OnAddRule" Padding="10,5"/>
+                <Button Content="🗑 删除规则" Margin="8,0,0,0" Style="{StaticResource Btn.Danger}"
+                        Click="OnRemoveRule" Padding="10,5"/>
+            </StackPanel>
+            <DataGrid x:Name="RuleGrid" Grid.Row="1" ItemsSource="{Binding AlarmRules}"
+                      IsReadOnly="False" MinHeight="140" MaxHeight="200">
+                <DataGrid.Columns>
+                    <DataGridComboBoxColumn Header="条件" SelectedItemBinding="{Binding Operator, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            ItemsSource="{Binding Source={StaticResource Operators}}" Width="70"/>
+                    <DataGridTextColumn Header="阈值" Width="90" IsReadOnly="False">
+                        <DataGridTextColumn.Binding>
+                            <Binding Path="Threshold" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"
+                                     Converter="{app:NumericTextConverter}"/>
+                        </DataGridTextColumn.Binding>
+                    </DataGridTextColumn>
+                    <DataGridComboBoxColumn Header="级别" SelectedItemBinding="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            ItemsSource="{Binding Source={StaticResource Levels}}" Width="80"/>
+                    <DataGridTextColumn Header="说明（可选）" Binding="{Binding Message, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="*" IsReadOnly="False"/>
+                    <DataGridCheckBoxColumn Header="启用" Width="60"
+                                            Binding="{Binding Enabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="关闭" MinWidth="90" Click="OnClose"/>
+        </StackPanel>
+    </Grid>
+</Window>

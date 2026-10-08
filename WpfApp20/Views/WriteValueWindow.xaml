@@ -1,0 +1,48 @@
+<Window x:Class="WpfApp20.Views.WriteValueWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="写入值" Width="440" Height="380" WindowStartupLocation="CenterOwner"
+        Background="{StaticResource Brush.Bg}" ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="写入 Modbus 寄存器" Style="{StaticResource Text.Title}" Grid.Row="0" Margin="0,0,0,14"/>
+
+        <!-- 标签信息 -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,14">
+            <StackPanel>
+                <TextBlock x:Name="TbTagInfo" FontSize="14" FontWeight="SemiBold"
+                           Foreground="{StaticResource Brush.Text}"/>
+                <TextBlock x:Name="TbCurrent" Style="{StaticResource Text.Sub}" Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 输入区 -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,10">
+            <TextBlock x:Name="TbLabel" Text="写入值（工程量）" Style="{StaticResource Text.Sub}" Margin="0,0,0,5"/>
+            <Grid>
+                <TextBox x:Name="TbValue" KeyDown="OnValueKeyDown"/>
+                <StackPanel x:Name="PnlBool" Orientation="Horizontal" Visibility="Collapsed">
+                    <RadioButton x:Name="RbTrue" Content="ON / 1" Margin="0,0,20,0" VerticalAlignment="Center"
+                                 Foreground="{StaticResource Brush.Text}"/>
+                    <RadioButton x:Name="RbFalse" Content="OFF / 0" IsChecked="True" VerticalAlignment="Center"
+                                 Foreground="{StaticResource Brush.Text}"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <TextBlock x:Name="TbResult" Grid.Row="3" TextWrapping="Wrap" FontSize="12"
+                   Foreground="{StaticResource Brush.SubText}" VerticalAlignment="Top"/>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="取消" MinWidth="80" Click="OnCancel"/>
+            <Button Content="写入" Style="{StaticResource Btn.Accent}" MinWidth="80" Margin="10,0,0,0" Click="OnWrite"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,84 @@
+<UserControl x:Class="WpfApp20.Views.DeviceManageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:WpfApp20">
+    <UserControl.Resources>
+        <local:DeviceStateBrushConverter x:Key="StateBrush"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 工具栏 -->
+        <Border Grid.Row="0" Style="{StaticResource Toolbar}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="设备管理" Style="{StaticResource Text.Title}" VerticalAlignment="Center"/>
+                <TextBlock Text="多设备 Modbus TCP 连接配置与监控启停" Style="{StaticResource Text.Sub}"
+                           VerticalAlignment="Center" Margin="14,4,0,0"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="24,0,0,0">
+                    <Button Content="＋ 新增设备" Style="{StaticResource Btn.Accent}" Click="OnAddDevice"/>
+                    <Button Content="✎ 编辑" Margin="8,0,0,0" Click="OnEditDevice" x:Name="BtnEdit"/>
+                    <Button Content="🗑 删除" Margin="8,0,0,0" Style="{StaticResource Btn.Danger}" Click="OnDeleteDevice"/>
+                    <Rectangle Width="1" Fill="{StaticResource Brush.Border}" Margin="12,2"/>
+                    <Button Content="▶ 启动监控" Style="{StaticResource Btn.Ok}" Click="OnStart"/>
+                    <Button Content="■ 停止监控" Margin="8,0,0,0" Click="OnStop"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- 设备列表 -->
+        <DataGrid Grid.Row="1" x:Name="Grid" ItemsSource="{Binding Devices}" Margin="16"
+                  MouseDoubleClick="OnGridDoubleClick" SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="状态" Width="130">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="10" Height="10" Margin="0,0,8,0"
+                                         Fill="{Binding State, Converter={StaticResource StateBrush}}"
+                                         VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding StateText}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="设备名称" Binding="{Binding Name}" Width="180" FontWeight="SemiBold"/>
+                <DataGridTextColumn Header="IP 地址" Binding="{Binding EndPoint}" Width="140"/>
+                <DataGridTextColumn Header="单元号" Binding="{Binding UnitId}" Width="60"/>
+                <DataGridTextColumn Header="连接信息（重连 / 心跳）" Binding="{Binding ConnectionInfo}" Width="210">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource Brush.SubText}"/>
+                            <Setter Property="FontSize" Value="12"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="轮询周期" Width="80">
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="PollIntervalMs" StringFormat="{}{0} ms"/>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridCheckBoxColumn Header="启用" Binding="{Binding Config.Enabled, Mode=TwoWay}" Width="60" IsReadOnly="False"/>
+                <DataGridTextColumn Header="标签数" Binding="{Binding TagCount}" Width="60"/>
+                <DataGridTextColumn Header="通讯统计" Binding="{Binding StatsText}" Width="180">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource Brush.SubText}"/>
+                            <Setter Property="FontSize" Value="12"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="最近错误" Binding="{Binding LastError}" Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="#C97A76"/>
+                            <Setter Property="FontSize" Value="12"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
